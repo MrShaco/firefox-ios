@@ -295,9 +295,14 @@ open class SQLiteLogins: BrowserLogins {
         "VALUES (?,?,?,?,?,1,?,?,?,?,?, " +
         "?, ?, 0, \(SyncStatus.new.rawValue)" +         // Metadata.
         ")"
-
+        /// (_) -> Deferred<Maybe<_>> T -> Deffered<Maybe<T>>
+        // () -> Sucesss
+//Cannot convert call result type '(_) -> Deferred<Maybe<_>>' to expected type '() -> Deferred<Maybe<Void>>'
         return db.run(sql, withArgs: args)
-                >>> effect(self.notifyLoginDidChange)
+            >>> { () -> Success in
+                self.notifyLoginDidChange()
+                return succeed()
+        }
     }
 
     fileprivate func cloneMirrorToOverlay(whereClause: String?, args: Args?) -> Deferred<Maybe<Int>> {

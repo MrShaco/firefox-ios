@@ -129,10 +129,17 @@ public func accumulate<T>(_ thunks: [() -> Deferred<Maybe<T>>]) -> Deferred<Mayb
  * Take a function and turn it into a side-effect that can appear
  * in a chain of async operations without producing its own value.
  */
-public func effect<T, U>(_ f: @escaping (T) -> U) -> (T) -> Deferred<Maybe<T>> {
+public func effect<T, U>(_ f: @escaping (T) -> U) -> ((T) -> Deferred<Maybe<T>>) {
     return { t in
         _ = f(t)
-        return deferMaybe(t)
+        return Deferred(value: Maybe(success: t))
+    }
+}
+
+public func effect<U>(_ f: @escaping () -> U) -> (() -> Success) {
+    return {
+        _ = f()
+        return succeed()
     }
 }
 
